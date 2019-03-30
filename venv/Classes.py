@@ -4,7 +4,7 @@ import sqlite3
 
 class DB:
     def __init__(self):
-        conn = sqlite3.connect('news.db', check_same_thread=False)
+        conn = sqlite3.connect('theory.db', check_same_thread=False)
         self.conn = conn
 
     def get_connection(self):
@@ -57,13 +57,13 @@ class UserModel:
         self.connection.commit()
 
 
-class NewsModel:
+class TheoryModel:
     def __init__(self, connection):
         self.connection = connection
 
     def init_table(self):
         cursor = self.connection.cursor()
-        cursor.execute('''CREATE TABLE IF NOT EXISTS news 
+        cursor.execute('''CREATE TABLE IF NOT EXISTS theory
                             (id INTEGER PRIMARY KEY AUTOINCREMENT, 
                              title VARCHAR(100),
                              content VARCHAR(1000),
