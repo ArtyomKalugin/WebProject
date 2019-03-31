@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <br>
+  <h1>Теория</h1>
+  <br>
+  <form action="" method="post" novalidate enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+      <p>
+        {{ form.title.label }}<br>
+        {{ form.title }}<br>
+        {% for error in form.title.errors %}
+          <div class="alert alert-danger" role="alert">
+            {{ error }}
+          </div>
+        {% endfor %}
+      </p>
+      <p>
+        {{ form.content.label }}<br>
+        {{ form.content }}<br>
+        {% for error in form.content.errors %}
+          <div class="alert alert-danger" role="alert">
+            {{ error }}
+          </div>
+        {% endfor %}
+        </p>
+      <p>
+        {{ form.file }}<br>
+      </p>
+      <br>
+      <p>{{ form.submit() }}</p>
+      <br>
+  </form>
+
+  {% if err %}
+    <div class="alert alert-danger" role="alert">
+      {{ err }}
+    </div>
+  {% endif %}
+
+{% endblock %}

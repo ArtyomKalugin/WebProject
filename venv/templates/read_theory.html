@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <br>
+  <p class="lead"><a href="/theories">Назад</a></p>
+  <br>
+
+  <h1>{{t[1]}}</h1>
+  <br>
+  <div>{{t[2]}}</div>
+  <br>
+  <div><small class="text-muted">{{t[3]}} {{t[4]}}</small></div>
+  <div><small class="text-muted">Теория {{t[0]}}</small></div>
+  <br>
+  {%  if t[5] %}
+    <img alt="theory_img" src="/static/img/{{t[5]}}">
+  {%  endif %}
+
+{% endblock %}

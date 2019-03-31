@@ -23,15 +23,16 @@ class UserModel:
         cursor.execute('''CREATE TABLE IF NOT EXISTS users 
                             (id INTEGER PRIMARY KEY AUTOINCREMENT, 
                              user_name VARCHAR(50),
-                             password_hash VARCHAR(128)
+                             password_hash VARCHAR(128),
+                             salt VARCHAR(20)
                              )''')
         cursor.close()
         self.connection.commit()
 
-    def exists(self, user_name, password_hash):
+    def exists(self, user_name):
         cursor = self.connection.cursor()
-        cursor.execute("SELECT * FROM users WHERE user_name = ? AND password_hash = ?",
-                       (user_name, password_hash))
+        cursor.execute("SELECT * FROM users WHERE user_name = ?",
+                       (user_name,))
         row = cursor.fetchone()
 
         return (True, row[0]) if row else (False,)
@@ -48,11 +49,17 @@ class UserModel:
         rows = cursor.fetchall()
         return rows
 
-    def insert(self, user_name, password_hash):
+    def insert(self, user_name, password_hash, salt):
         cursor = self.connection.cursor()
         cursor.execute('''INSERT INTO users 
-                          (user_name, password_hash) 
-                          VALUES (?,?)''', (user_name, password_hash))
+                          (user_name, password_hash, salt) 
+                          VALUES (?,?,?)''', (user_name, password_hash, salt))
+        cursor.close()
+        self.connection.commit()
+
+    def delete(self, user_id):
+        cursor = self.connection.cursor()
+        cursor.execute('''DELETE FROM users WHERE id = ?''', (str(user_id),))
         cursor.close()
         self.connection.commit()
 
@@ -67,56 +74,39 @@ class TheoryModel:
                             (id INTEGER PRIMARY KEY AUTOINCREMENT, 
                              title VARCHAR(100),
                              content VARCHAR(1000),
-                             user_id INTEGER
+                             user VARCHAR(50),
+                             data VARCHAR(20),
+                             filename VARCHAR(50)
                              )''')
         cursor.close()
         self.connection.commit()
 
-    def insert(self, title, content, user_id):
+    def insert(self, title, content, user, data, filename):
         cursor = self.connection.cursor()
-        cursor.execute('''INSERT INTO news 
-                          (title, content, user_id) 
-                          VALUES (?,?,?)''', (title, content, str(user_id)))
+        cursor.execute('''INSERT INTO theory
+                          (title, content, user, data, filename) 
+                          VALUES (?,?,?,?,?)''', (title, content, user, data, filename))
         cursor.close()
         self.connection.commit()
 
-    def get(self, news_id):
+    def get(self, theory_id):
         cursor = self.connection.cursor()
-        cursor.execute("SELECT * FROM news WHERE id = ?", (str(news_id),))
+        cursor.execute("SELECT * FROM theory WHERE id = ?", (theory_id,))
         row = cursor.fetchone()
         return row
 
-    def get_all(self, user_id=None):
+    def get_all(self, user=None):
         cursor = self.connection.cursor()
-        if user_id:
-            cursor.execute("SELECT * FROM news WHERE user_id = ?",
-                           (str(user_id),))
+        if user:
+            cursor.execute("SELECT * FROM theory WHERE user = ?",
+                           (user,))
         else:
-            cursor.execute("SELECT * FROM news")
+            cursor.execute("SELECT * FROM theory")
         rows = cursor.fetchall()
         return rows
 
-    def delete(self, news_id):
+    def delete(self, theory_id):
         cursor = self.connection.cursor()
-        cursor.execute('''DELETE FROM news WHERE id = ?''', (str(news_id),))
+        cursor.execute('''DELETE FROM theory WHERE id = ?''', (str(theory_id),))
         cursor.close()
         self.connection.commit()
-
-    def insert(self, title, content, user_id):
-        cursor = self.connection.cursor()
-        cursor.execute('''INSERT INTO news 
-                          (title, content, user_id) 
-                          VALUES (?,?,?)''', (title, content, str(user_id)))
-        cursor.close()
-        self.connection.commit()
-
-
-if __name__ == '__main__':
-    print('Hello!')
-
-
-
-
-
-
-

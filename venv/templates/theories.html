@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <br>
+  <h1>Теории по Игрe Престолов</h1>
+  <br>
+  {% if "username" in session %}
+    <p class="lead"><a href="/add_theory">Добавить свою теорию</a></p>
+  {% endif %}
+
+  {% if "username" not in session %}
+    <p class="lead"><a href="/sign_in">Добавить свою теорию</a></p>
+  {% endif %}
+
+  <br>
+
+  <form action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+      <p class="lead">
+        {{ cont.content.label }}<br>
+        {{ cont.content }}<br>
+        {% for error in cont.content.errors %}
+        <div class="alert alert-danger" role="alert">
+          {{ error }}
+        </div>
+        {% endfor %}
+      </p>
+
+      <p class="lead">
+        {{ aut.author.label }}<br>
+        {{ aut.author }}<br>
+        {% for error in aut.author.errors %}
+          <div class="alert alert-danger" role="alert">
+            {{ error }}
+          </div>
+        {% endfor %}
+      </p>
+
+      <p class="lead">{{ form.submit() }}</p>
+
+  </form>
+
+  <br>
+  <p class="lead">Все теории:</p>
+  <br>
+
+  {% for item in t %}
+    <a href="/read_theory/{{item[0]}}">
+      <div class="alert alert-dark" role="alert">
+        <h2>{{item[1]}}</h2>
+        <div>{{item[2]}}</div>
+        <br>
+        <div><small class="text-muted">{{item[3]}} {{item[4]}}</small></div>
+        <div><small class="text-muted">Теория {{item[0]}}</small></div>
+      </div>
+    </a>
+  {% endfor %}
+
+{% endblock %}
