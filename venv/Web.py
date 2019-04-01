@@ -4,7 +4,7 @@ from LoginForm import LoginForm, SignInForm
 import string
 from werkzeug.security import generate_password_hash, check_password_hash, gen_salt
 import random
-from Search import ContentSearch, AuthorSearch, SubmitButton
+from Search import TitleSearch, AuthorSearch, SubmitButton
 import datetime
 from AddTheory import AddTheoryForm
 import shutil
@@ -39,6 +39,7 @@ def login():
         name = request.form['username']
         pso = request.form['password_one']
         pst = request.form['password_two']
+        data = datetime.date.today()
 
         check = [False, False]
 
@@ -71,10 +72,10 @@ def login():
             if len(pso) > 5:
                 user = UserModel(db.get_connection())
                 hash = generate_password_hash(pso)
-                salt = gen_salt(random.choice(range(10)))
+                salt = gen_salt(random.choice(range(1, 10)))
                 hash += salt
 
-                user.insert(name, hash, salt)
+                user.insert(name, hash, salt, data)
                 session['username'] = name
                 return redirect('/success_login')
             else:
@@ -86,6 +87,9 @@ def login():
 
 @app.route('/logout')
 def logout():
+    if 'username' not in session:
+        return redirect('/sign_in')
+
     session.pop('username', 0)
     return redirect('/sign_in')
 
@@ -125,12 +129,14 @@ def success_login():
 @app.route('/theories', methods=['GET', 'POST'])
 def theories():
     aut = AuthorSearch()
-    cont = ContentSearch()
+    tit = TitleSearch()
     form = SubmitButton()
 
     theor = TheoryModel(db.get_connection())
     all_teories = theor.get_all()
     all_teories = all_teories[::-1]
+    result = []
+    note = 'Все теории:'
 
     for i in range(len(all_teories)):
         if len(all_teories[i][2]) > 100:
@@ -138,14 +144,49 @@ def theories():
                               all_teories[i][3], all_teories[i][4])
 
     if form.validate_on_submit():
-        pass
+        author = request.form['author']
+        title = request.form['title']
+
+        if author and not title:
+            note = 'По вашему запросу нашлось:'
+            for elem in all_teories:
+                if author.lower() in elem[3].lower():
+                    result.append(elem)
+
+        if not author and title:
+            note = 'По вашему запросу нашлось:'
+            for elem in all_teories:
+                if title.lower() in elem[1].lower():
+                    result.append(elem)
+
+        if author and title:
+            note = 'По вашему запросу нашлось:'
+            for elem in all_teories:
+                if title.lower() in elem[1].lower() and author.lower() in elem[3].lower():
+                    result.append(elem)
+
+        if len(result) == 0:
+            note = 'По вашему запросу ничего не нашлось!'
+
+        return render_template('theories.html', aut=aut, tit=tit, form=form, t=result, n=note)
     else:
-        return render_template('theories.html', aut=aut, cont=cont, form=form, t=all_teories)
+        return render_template('theories.html', aut=aut, tit=tit, form=form, t=all_teories, n=note)
 
 
 @app.route('/cabinet')
 def cabinet():
-    return 'PASS'
+    if 'username' not in session:
+        return redirect('/sign_in')
+
+    um = UserModel(db.get_connection())
+    all = []
+    if um.exists(session['username'])[0]:
+        all = um.get(um.exists(session['username'])[1])
+
+    tm = TheoryModel(db.get_connection())
+    content = 'Всего теорий: ' + str(len(tm.get_all(user_id=all[0])))
+
+    return render_template('cabinet.html', n=session['username'], i=all[0], d=all[4], l=content)
 
 
 @app.route('/add_theory', methods=['GET', 'POST'])
@@ -194,7 +235,9 @@ def add_theory():
             name = None
 
         theor = TheoryModel(db.get_connection())
-        theor.insert(title, text, session['username'], data, name)
+        if UserModel(db.get_connection()).exists(session['username'])[0]:
+            id = UserModel(db.get_connection()).exists(session['username'])[1]
+        theor.insert(title, text, session['username'], data, name, id)
 
         return redirect('/theories')
 
@@ -206,6 +249,89 @@ def add_theory():
 def read_theory(theory_id):
     theor = TheoryModel(db.get_connection()).get(theory_id)
     return render_template('read_theory.html', t=theor)
+
+
+@app.route('/delete')
+def delete():
+    if 'username' not in session:
+        return redirect('/sign_in')
+
+    um = UserModel(db.get_connection())
+    if um.exists(session['username'])[0]:
+        um.delete(um.exists(session['username'])[1])
+
+    session.pop('username', 0)
+
+    return redirect('/login')
+
+
+@app.route('/read_my_theories', methods=['GET', 'POST'])
+def read_my_theories():
+    if 'username' not in session:
+        return redirect('/sign_in')
+
+    theor = TheoryModel(db.get_connection())
+    tit = TitleSearch()
+    form = SubmitButton()
+    result = []
+
+    err = 'Все ваши теории'
+    if UserModel(db.get_connection()).exists(session['username'])[0]:
+        id = UserModel(db.get_connection()).exists(session['username'])[1]
+
+    all_teories = theor.get_all(user_id=id)
+    all_teories = all_teories[::-1]
+
+    if len(all_teories) == 0:
+        err = 'Вы еще не добавили ни одной теории!'
+        return render_template('read_my_theories.html', tit=tit, form=form, t=result, n=err)
+
+    if form.validate_on_submit():
+        title = request.form['title']
+
+        if title:
+            err = 'По вашему запросу нашлось:'
+            for elem in all_teories:
+                if title.lower() in elem[1].lower():
+                    result.append(elem)
+
+        if len(result) == 0:
+            err = 'По вашему запросу ничего не нашлось!'
+
+        return render_template('read_my_theories.html', tit=tit, form=form, t=result, n=err)
+
+    else:
+        return render_template('read_my_theories.html', n=err, t=all_teories, tit=tit, form=form)
+
+
+@app.route('/delete_theory/<int:theory_id>', methods=['GET'])
+def delete_theory(theory_id):
+    TheoryModel(db.get_connection()).delete(theory_id)
+
+    return redirect('/read_my_theories')
+
+
+@app.route('/read_theory_my/<int:theory_id>', methods=['GET'])
+def read_theory_my(theory_id):
+    theor = TheoryModel(db.get_connection()).get(theory_id)
+    return render_template('read_theory_my.html', t=theor)
+
+
+@app.route('/cabinet_other/<int:user_id>', methods=['GET'])
+def cabinet_other(user_id):
+    if 'username' not in session:
+        return redirect('/sign_in')
+
+    um = UserModel(db.get_connection())
+    all = um.get(user_id)
+
+    if all:
+        tm = TheoryModel(db.get_connection())
+        content = 'Всего теорий: ' + str(len(tm.get_all(user_id=all[0])))
+
+        return render_template('cabinet_other.html', n=all[1], i=all[0], d=all[4], l=content, q=None)
+    else:
+        return render_template('cabinet_other.html', q='1')
 
 
 if __name__ == '__main__':

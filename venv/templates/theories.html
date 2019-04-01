@@ -16,17 +16,17 @@
 
   <form action="" method="post" novalidate>
     {{ form.hidden_tag() }}
-      <p class="lead">
-        {{ cont.content.label }}<br>
-        {{ cont.content }}<br>
-        {% for error in cont.content.errors %}
+      <p class="lead" id="1" style="float: left; margin-right: 50px;">
+        {{ tit.title.label }}<br>
+        {{ tit.title }}<br>
+        {% for error in tit.title.errors %}
         <div class="alert alert-danger" role="alert">
           {{ error }}
         </div>
         {% endfor %}
       </p>
 
-      <p class="lead">
+      <p class="lead" id="2" style="margin: 10px;">
         {{ aut.author.label }}<br>
         {{ aut.author }}<br>
         {% for error in aut.author.errors %}
@@ -36,12 +36,12 @@
         {% endfor %}
       </p>
 
-      <p class="lead">{{ form.submit() }}</p>
+      <p class="lead" style="margin-right: 1000px;">{{ form.submit() }}</p>
 
   </form>
 
   <br>
-  <p class="lead">Все теории:</p>
+  <p class="lead">{{n}}</p>
   <br>
 
   {% for item in t %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <br>
+  <h1>Мои теории</h1>
+  <br>
+  <p class="lead"><a href="/cabinet">Назад</a></p>
+  <br>
+
+  <form action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+      <p class="lead">
+        {{ tit.title.label }}<br>
+        {{ tit.title }}<br>
+        {% for error in tit.title.errors %}
+        <div class="alert alert-danger" role="alert">
+          {{ error }}
+        </div>
+        {% endfor %}
+      </p>
+
+      <p class="lead">{{ form.submit() }}</p>
+
+  </form>
+
+  <br>
+  <p class="lead">{{n}}</p>
+  <br>
+
+  {% for item in t %}
+    <a href="/read_theory_my/{{item[0]}}">
+      <div class="alert alert-dark" role="alert">
+        <h2>{{item[1]}}</h2>
+        <div>{{item[2]}}</div>
+        <br>
+        <div><small class="text-muted">{{item[3]}} {{item[4]}}</small></div>
+        <div><small class="text-muted">Теория {{item[0]}}</small></div>
+        <br>
+        <div><small class="text-muted"><a href="/delete_theory/{{item[0]}}">Удалить</a></small></div>
+      </div>
+    </a>
+  {% endfor %}
+
+{% endblock %}

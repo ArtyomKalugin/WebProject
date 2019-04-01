@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <br>
+  <h1>Ваш личный кабинет</h1>
+  <br>
+  <p class="lead">{{n}}</p>
+  <br>
+  <table>
+    <tr>
+      <td><p class="lead">Дата регистрации: {{d}}</p></td>
+      <td><p class="lead">Ваш id: {{i}}</p></td>
+    <tr>
+      <td><p class="lead">{{l}}</p></td>
+      <td><p class="lead"><a href="/add_theory">Добавить теорию</a></p></td>
+    <tr>
+      <td><p class="lead"><a href="/logout">Выйти</a></p></td>
+      <td><p class="lead"><a href="/delete">Удалить аккаунт</a></p></td>
+  </table>
+  <br>
+  <p class="lead"><a href="/read_my_theories">Мои теории</a></p>
+  <br>
+
+{% endblock %}

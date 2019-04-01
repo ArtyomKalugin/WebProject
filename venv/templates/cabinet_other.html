@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+  {%  if not q %}
+    <br>
+    <h1>Страница пользователя</h1>
+    <br>
+    <p class="lead">{{n}}</p>
+    <br>
+    <p class="lead">Дата регистрации: {{d}}</p>
+    <br>
+    <p class="lead">{{l}}</p>
+    <br>
+
+  {% else %}
+    <br>
+    <p class="lead">Страница пользователя удалена</p>
+    <br>
+  {% endif %}
+
+{% endblock %}

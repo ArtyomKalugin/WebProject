@@ -60,6 +60,12 @@
       width: 1100px;
       height: 400px;
     }
+    table {
+      border-collapse: separate;
+    }
+    td {
+      padding-right: 50px;
+    }
     </style>
 </head>
   <body>
@@ -82,7 +88,7 @@
       {% if "username" in session %}
         <ul class="navbar-nav ml-auto">
           <li class="nav-item">
-            <a class="nav-link" href="/logout">{{session['username']}}</a>
+            <a class="nav-link" href="/cabinet">{{session['username']}}</a>
           </li>
         </ul>
       {% endif %}

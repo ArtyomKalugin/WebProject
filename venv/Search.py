@@ -2,8 +2,8 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 
 
-class ContentSearch(FlaskForm):
-    content = StringField('Поиск по названию')
+class TitleSearch(FlaskForm):
+    title = StringField('Поиск по названию')
 
 
 class AuthorSearch(FlaskForm):
