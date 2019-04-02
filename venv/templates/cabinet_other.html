@@ -6,7 +6,13 @@
     <br>
     <h1>Страница пользователя</h1>
     <br>
-    <p class="lead">{{n}}</p>
+    <table>
+      <tr>
+        <td><img alt="user_img" src="/static/img/{{p}}" width="50" height="50" class="rounded-circle"></td>
+        <td><p class="lead"><strong>{{n}}</strong></p></td>
+        <td><p class="lead"><em>{{s}}</em></p></td>
+      </tr>
+    </table>
     <br>
     <p class="lead">Дата регистрации: {{d}}</p>
     <br>
@@ -15,7 +21,7 @@
 
   {% else %}
     <br>
-    <p class="lead">Страница пользователя удалена</p>
+    <p class="lead"><em>Страница пользователя удалена</em></p>
     <br>
   {% endif %}
 

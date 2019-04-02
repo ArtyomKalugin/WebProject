@@ -10,6 +10,8 @@ from AddTheory import AddTheoryForm
 import shutil
 import imghdr
 import os
+from Victorine import QuizForm, alias
+from LoadPhoto import LoadPhotoForm
 
 
 app = Flask(__name__)
@@ -75,8 +77,9 @@ def login():
                 salt = gen_salt(random.choice(range(1, 10)))
                 hash += salt
 
-                user.insert(name, hash, salt, data)
+                user.insert(name, hash, salt, data, 'Cреднестатистический обыватель', 'default.png')
                 session['username'] = name
+                session['photo'] = 'default.png'
                 return redirect('/success_login')
             else:
                 err = 'Пароль должен быть длиннее 5 символов'
@@ -91,6 +94,7 @@ def logout():
         return redirect('/sign_in')
 
     session.pop('username', 0)
+    session.pop('photo', 0)
     return redirect('/sign_in')
 
 
@@ -109,7 +113,9 @@ def sign_in():
             salt = len(user.get(exists[1])[3])
 
             if check_password_hash(password_model[:len(password_model) - salt], password):
+                photo = user.get(exists[1])[6]
                 session['username'] = name
+                session['photo'] = photo
                 return redirect('/main')
             else:
                 err = 'Ошибка в логине или пароле'
@@ -173,20 +179,55 @@ def theories():
         return render_template('theories.html', aut=aut, tit=tit, form=form, t=all_teories, n=note)
 
 
-@app.route('/cabinet')
+@app.route('/cabinet', methods=['GET', 'POST'])
 def cabinet():
     if 'username' not in session:
         return redirect('/sign_in')
 
     um = UserModel(db.get_connection())
     all = []
+    err = None
+
     if um.exists(session['username'])[0]:
         all = um.get(um.exists(session['username'])[1])
 
     tm = TheoryModel(db.get_connection())
     content = 'Всего теорий: ' + str(len(tm.get_all(user_id=all[0])))
 
-    return render_template('cabinet.html', n=session['username'], i=all[0], d=all[4], l=content)
+    form = LoadPhotoForm()
+
+    if form.validate_on_submit():
+        f = form.file.data
+
+        if f:
+            name = f.filename
+            session['photo'] = name
+            result = open(name, 'wb')
+            result.write(f.read())
+            result.close()
+
+            way = 'static/img/' + name
+
+            if os.path.exists(way):
+                os.remove(way)
+
+            shutil.move(name, 'static/img')
+
+            if not imghdr.what(way):
+                err = 'Файл недопустимого формата'
+                os.remove(way)
+                return render_template('cabinet.html', n=session['username'], i=all[0], d=all[4], l=content, s=all[5],
+                                       p=all[6], err=err)
+            else:
+                um = UserModel(db.get_connection())
+                if um.exists(session['username'])[0]:
+                    id = um.exists(session['username'])[1]
+                um.change_photo(name, id)
+
+        return redirect('/cabinet')
+
+    else:
+        return render_template('cabinet.html', n=session['username'], i=all[0], d=all[4], l=content, s=all[5], p=all[6], err=err, form=form)
 
 
 @app.route('/add_theory', methods=['GET', 'POST'])
@@ -230,6 +271,7 @@ def add_theory():
 
             if not imghdr.what(way):
                 err = 'Файл недопустимого формата'
+                os.remove(way)
                 return render_template('add_theory.html', form=form, err=err)
         else:
             name = None
@@ -248,7 +290,9 @@ def add_theory():
 @app.route('/read_theory/<int:theory_id>', methods=['GET'])
 def read_theory(theory_id):
     theor = TheoryModel(db.get_connection()).get(theory_id)
-    return render_template('read_theory.html', t=theor)
+    id = theor[6]
+    photo = UserModel(db.get_connection()).get(id)[6]
+    return render_template('read_theory.html', t=theor, p=photo)
 
 
 @app.route('/delete')
@@ -261,6 +305,7 @@ def delete():
         um.delete(um.exists(session['username'])[1])
 
     session.pop('username', 0)
+    session.pop('photo', 0)
 
     return redirect('/login')
 
@@ -329,9 +374,44 @@ def cabinet_other(user_id):
         tm = TheoryModel(db.get_connection())
         content = 'Всего теорий: ' + str(len(tm.get_all(user_id=all[0])))
 
-        return render_template('cabinet_other.html', n=all[1], i=all[0], d=all[4], l=content, q=None)
+        return render_template('cabinet_other.html', n=all[1], i=all[0], d=all[4], l=content, q=None, s=all[5], p=all[6])
     else:
         return render_template('cabinet_other.html', q='1')
+
+
+@app.route('/victorine', methods=['GET', 'POST'])
+def victorine():
+
+    if 'username' not in session:
+        return redirect('/sign_in')
+
+    form = QuizForm()
+
+    if form.validate_on_submit():
+        result = []
+        true_answers = 0
+        status = (None, None)
+
+        for i in range(6):
+            block = 'block_' + str(i + 1)
+            result.append(request.form.get(block))
+
+        for elem in result:
+            if elem == 'True':
+                true_answers += 1
+
+        if true_answers == 0:
+            status = (str(true_answers), 'Среднестатистический обыватель!')
+        else:
+            status = (str(true_answers), alias[true_answers - 1])
+
+        um = UserModel(db.get_connection())
+        if um.exists(session['username'])[0]:
+            um.change_status(status[1], um.exists(session['username'])[1])
+
+        return render_template('result_quiz.html', r=status)
+    else:
+        return render_template('victorine.html', form=form)
 
 
 if __name__ == '__main__':

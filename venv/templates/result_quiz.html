@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <br>
+  <h1>Результат викторины</h1>
+  <br>
+  <p class="lead">Поздравляем! Вы набрали {{r[0]}} баллов</p>
+  <p class="lead">Теперь вы <em>"{{r[1]}}"</em></p>
+  <br>
+  <p class="lead"><a href="/cabinet">В личный кабинет</a></p>
+  <br>
+
+{% endblock %}

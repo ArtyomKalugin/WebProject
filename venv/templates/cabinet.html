@@ -4,18 +4,41 @@
   <br>
   <h1>Ваш личный кабинет</h1>
   <br>
-  <p class="lead">{{n}}</p>
+  <table>
+    <tr>
+      <td><img alt="user_img" src="/static/img/{{p}}" width="50" height="50" class="rounded-circle"></td>
+      <td><p class="lead"><strong>{{n}}</strong></p></td>
+      <td><p class="lead"><em>{{s}}</em></p></td>
+    </tr>
+  </table>
+  <form action="" method="post" novalidate enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+      <table>
+        <tr>
+          <td>{{ form.file }}</td>
+          <td>{{ form.submit() }}</td>
+        </tr>
+      </table>
+  </form>
+  {% if err %}
+    <div class="alert alert-danger" role="alert">
+      {{ err }}
+    </div>
+  {% endif %}
   <br>
   <table>
     <tr>
       <td><p class="lead">Дата регистрации: {{d}}</p></td>
       <td><p class="lead">Ваш id: {{i}}</p></td>
+    </tr>
     <tr>
       <td><p class="lead">{{l}}</p></td>
       <td><p class="lead"><a href="/add_theory">Добавить теорию</a></p></td>
+    </tr>
     <tr>
       <td><p class="lead"><a href="/logout">Выйти</a></p></td>
       <td><p class="lead"><a href="/delete">Удалить аккаунт</a></p></td>
+    </tr>
   </table>
   <br>
   <p class="lead"><a href="/read_my_theories">Мои теории</a></p>

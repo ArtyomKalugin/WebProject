@@ -25,7 +25,9 @@ class UserModel:
                              user_name VARCHAR(50),
                              password_hash VARCHAR(128),
                              salt VARCHAR(20),
-                             data VARCHAR(20)
+                             data VARCHAR(20),
+                             status VARCHAR(100),
+                             filename VARCHAR(50)
                              )''')
         cursor.close()
         self.connection.commit()
@@ -50,11 +52,23 @@ class UserModel:
         rows = cursor.fetchall()
         return rows
 
-    def insert(self, user_name, password_hash, salt, data):
+    def insert(self, user_name, password_hash, salt, data, status, filename):
         cursor = self.connection.cursor()
         cursor.execute('''INSERT INTO users 
-                          (user_name, password_hash, salt, data) 
-                          VALUES (?,?,?, ?)''', (user_name, password_hash, salt, data))
+                          (user_name, password_hash, salt, data, status, filename) 
+                          VALUES (?,?,?,?,?,?)''', (user_name, password_hash, salt, data, status, filename))
+        cursor.close()
+        self.connection.commit()
+
+    def change_status(self, status, user_id):
+        cursor = self.connection.cursor()
+        cursor.execute('''UPDATE users SET status = ? WHERE id = ?''', (status, user_id))
+        cursor.close()
+        self.connection.commit()
+
+    def change_photo(self, filename, user_id):
+        cursor = self.connection.cursor()
+        cursor.execute('''UPDATE users SET filename = ? WHERE id = ?''', (filename, user_id))
         cursor.close()
         self.connection.commit()
 

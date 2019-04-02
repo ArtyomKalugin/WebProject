@@ -9,11 +9,20 @@
   <br>
   <div>{{t[2]}}</div>
   <br>
-  <div><small class="text-muted"><a href="/cabinet_other/{{t[6]}}">{{t[3]}}</a> {{t[4]}}</small></div>
-  <div><small class="text-muted">Теория {{t[0]}}</small></div>
-  <br>
   {%  if t[5] %}
-    <img alt="theory_img" src="/static/img/{{t[5]}} width="50%" height="50%">
+    <img alt="theory_img" src="/static/img/{{t[5]}}" width="50%" height="50%">
+    <br>
   {%  endif %}
+  <div>
+    <table>
+      <tr>
+        <td><img alt="user_img" src="/static/img/{{p}}" width="50" height="50" class="rounded-circle"></td>
+        <td><small class="text-muted"><strong><a href="/cabinet_other/{{t[6]}}">{{t[3]}}</a></strong></small></td>
+        <td><small class="text-muted"><em>{{t[4]}}</em></small></td>
+        <td><small class="text-muted">Теория {{t[0]}}</small></td>
+      </tr>
+    </table>
+  </div>
+  <br>
 
 {% endblock %}

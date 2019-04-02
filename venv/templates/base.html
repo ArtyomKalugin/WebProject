@@ -78,17 +78,17 @@
           <a class="nav-link" href="/theories">Теории по сериалу</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#">Персонажи</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Пройти опрос</a>
+          <a class="nav-link" href="/victorine">Пройти опрос</a>
         </li>
        </ul>
 
       {% if "username" in session %}
         <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <img alt="user_img" src="/static/img/{{session['photo']}}" width="50" height="50" class="rounded-circle" style="margin-top: 20px;">
+          </li>
           <li class="nav-item">
-            <a class="nav-link" href="/cabinet">{{session['username']}}</a>
+            <a class="nav-link" href="/cabinet"><strong>{{session['username']}}</strong></a>
           </li>
         </ul>
       {% endif %}

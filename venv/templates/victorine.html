@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <br>
+  <h1>Насколько хорошо ты знаешь Игру Престолов?</h1>
+  <small class="text-muted">Результат будет сохранен!</small>
+  <br>
+  <br>
+
+  <form action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+
+      <p class="lead">{{ form.block_1.label }}</p>
+      <div class="control-group" style="margin-left: 30px;">
+          {% for subfield in form.block_1 %}
+            <label class="radio">
+                {{ subfield }}
+                {{ subfield.label }}
+            </label>
+            <br>
+          {% endfor %}
+      </div>
+
+      <br>
+      <p class="lead">{{ form.block_2.label }}</p>
+      <div class="control-group" style="margin-left: 30px;">
+          {% for subfield in form.block_2 %}
+            <label class="radio">
+                {{ subfield }}
+                {{ subfield.label }}
+            </label>
+            <br>
+          {% endfor %}
+      </div>
+
+      <br>
+      <p class="lead">{{ form.block_3.label }}</p>
+      <div class="control-group" style="margin-left: 30px;">
+          {% for subfield in form.block_3 %}
+            <label class="radio">
+                {{ subfield }}
+                {{ subfield.label }}
+            </label>
+            <br>
+          {% endfor %}
+      </div>
+
+      <br>
+      <p class="lead">{{ form.block_4.label }}</p>
+      <div class="control-group" style="margin-left: 30px;">
+          {% for subfield in form.block_4 %}
+            <label class="radio">
+                {{ subfield }}
+                {{ subfield.label }}
+            </label>
+            <br>
+          {% endfor %}
+      </div>
+
+      <br>
+      <p class="lead">{{ form.block_5.label }}</p>
+      <div class="control-group" style="margin-left: 30px;">
+          {% for subfield in form.block_5 %}
+            <label class="radio">
+                {{ subfield }}
+                {{ subfield.label }}
+            </label>
+            <br>
+          {% endfor %}
+      </div>
+
+      <br>
+      <p class="lead">{{ form.block_6.label }}</p>
+      <div class="control-group" style="margin-left: 30px;">
+          {% for subfield in form.block_6 %}
+            <label class="radio">
+                {{ subfield }}
+                {{ subfield.label }}
+            </label>
+            <br>
+          {% endfor %}
+      </div>
+
+      <br>
+      <p>{{ form.submit() }}</p>
+      <br>
+  </form>
+
+{% endblock %}
