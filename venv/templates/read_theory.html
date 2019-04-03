@@ -1,8 +1,19 @@
+<!-- Чтение отдельной полной теории -->
+
 {% extends "base.html" %}
+
+{% block head %}
+  <title>Теория</title>
+  <link rel="shortcut icon" href="static/img/icon.png" type="image/png">
+{% endblock %}
 
 {% block content %}
   <br>
-  <p class="lead"><a href="/theories">Назад</a></p>
+  {% if u %}
+    <p class="lead"><a href="/read_my_theories">Назад</a></p>
+  {% else %}
+    <p class="lead"><a href="/theories">Назад</a></p>
+  {% endif %}
   <br>
 
   <h1>{{t[1]}}</h1>
@@ -16,7 +27,12 @@
   <div>
     <table>
       <tr>
-        <td><img alt="user_img" src="/static/img/{{p}}" width="50" height="50" class="rounded-circle"></td>
+        {% if u %}
+          <td><img alt="user_img" src="/static/img/{{session['photo']}}" width="50" height="50" class="rounded-circle"></td>
+        {% else %}
+          <td><img alt="user_img" src="/static/img/{{p}}" width="50" height="50" class="rounded-circle"></td>
+        {% endif %}
+
         <td><small class="text-muted"><strong><a href="/cabinet_other/{{t[6]}}">{{t[3]}}</a></strong></small></td>
         <td><small class="text-muted"><em>{{t[4]}}</em></small></td>
         <td><small class="text-muted">Теория {{t[0]}}</small></td>

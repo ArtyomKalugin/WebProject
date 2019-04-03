@@ -3,6 +3,7 @@ from wtforms import StringField, SubmitField, TextAreaField, FileField
 from wtforms.validators import DataRequired
 
 
+# Форма для добавления теории
 class AddTheoryForm(FlaskForm):
     title = StringField('Заголовок теории', validators=[DataRequired()])
     content = TextAreaField('Текст теории', validators=[DataRequired()])

@@ -14,25 +14,36 @@ from Victorine import QuizForm, alias
 from LoadPhoto import LoadPhotoForm
 
 
+# Глобальные переменные, ключ
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 db = DB()
 
-'''''''''
-M = UserModel(db.get_connection())
-M.init_table()
 
-n = TheoryModel(db.get_connection())
-n.init_table()
-'''
+# Функция создания пароля, хэширование и соление
+def password_salt(password):
+    hash = generate_password_hash(password)
+    salt = gen_salt(random.choice(range(1, 10)))
+    hash += salt
+
+    return (hash, salt)
 
 
+# Функция для фотографий, если существуют - удаляем, иначе перемащем в папку
+def move_photo(way, name):
+    if os.path.exists(way):
+        os.remove(way)
 
+    shutil.move(name, 'static/img')
+
+
+# Страница, на которой отображается информация о среиале
 @app.route('/main')
 def main_page():
     return render_template('main_page.html')
 
 
+# Регистрация
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -45,6 +56,7 @@ def login():
 
         check = [False, False]
 
+        # Проверка логина и пароля
         if UserModel(db.get_connection()).exists(name)[0]:
             err = 'Такой логин уже существует'
             return render_template('login.html', title='Регистрация', form=form, err=err)
@@ -66,20 +78,24 @@ def login():
             err = 'Логин должен содержать латинские буквы и цифры'
             return render_template('login.html', title='Регистрация', form=form, err=err)
 
-
         if pso != pst:
             err = 'Пароли не одинаковы'
             return render_template('login.html', title='Регистрация', form=form, err=err)
         else:
             if len(pso) > 5:
+                # Создание пользователя
                 user = UserModel(db.get_connection())
-                hash = generate_password_hash(pso)
-                salt = gen_salt(random.choice(range(1, 10)))
-                hash += salt
+
+                hash, salt = password_salt(pso)
 
                 user.insert(name, hash, salt, data, 'Cреднестатистический обыватель', 'default.png')
+
                 session['username'] = name
                 session['photo'] = 'default.png'
+
+                if user.exists(name)[0]:
+                    session['id'] = user.exists(name)[1]
+
                 return redirect('/success_login')
             else:
                 err = 'Пароль должен быть длиннее 5 символов'
@@ -88,16 +104,20 @@ def login():
     return render_template('login.html', title='Регистрация', form=form, err=err)
 
 
+# Выход из системы
 @app.route('/logout')
 def logout():
     if 'username' not in session:
         return redirect('/sign_in')
 
+    # Достаточно забыть пользователя в системе
     session.pop('username', 0)
     session.pop('photo', 0)
+    session.pop('id', 0)
     return redirect('/sign_in')
 
 
+# Вход в систему
 @app.route('/sign_in', methods=['GET', 'POST'])
 def sign_in():
     form = SignInForm()
@@ -112,10 +132,13 @@ def sign_in():
             password_model = user.get(exists[1])[2]
             salt = len(user.get(exists[1])[3])
 
+            # Проверка валидности введеных данных
             if check_password_hash(password_model[:len(password_model) - salt], password):
                 photo = user.get(exists[1])[6]
                 session['username'] = name
                 session['photo'] = photo
+                session['id'] = exists[1]
+
                 return redirect('/main')
             else:
                 err = 'Ошибка в логине или пароле'
@@ -127,11 +150,13 @@ def sign_in():
     return render_template('sign_in.html', title='Авторизация', form=form, err=err)
 
 
+# При успешной регистрации
 @app.route('/success_login')
 def success_login():
     return render_template('success_login.html')
 
 
+# Страница со всеми теориями
 @app.route('/theories', methods=['GET', 'POST'])
 def theories():
     aut = AuthorSearch()
@@ -144,6 +169,7 @@ def theories():
     result = []
     note = 'Все теории:'
 
+    # Если теория больше 100 символов, то она печатается в сокращенном виде
     for i in range(len(all_teories)):
         if len(all_teories[i][2]) > 100:
             all_teories[i] = (all_teories[i][0], all_teories[i][1], all_teories[i][2][:100] + '...',
@@ -179,6 +205,7 @@ def theories():
         return render_template('theories.html', aut=aut, tit=tit, form=form, t=all_teories, n=note)
 
 
+# Личный кабинет
 @app.route('/cabinet', methods=['GET', 'POST'])
 def cabinet():
     if 'username' not in session:
@@ -196,6 +223,7 @@ def cabinet():
 
     form = LoadPhotoForm()
 
+    # Загрузка фотографии
     if form.validate_on_submit():
         f = form.file.data
 
@@ -208,11 +236,10 @@ def cabinet():
 
             way = 'static/img/' + name
 
-            if os.path.exists(way):
-                os.remove(way)
+            # Если фотография уже существует в нашей папке, то удаляем ее
+            move_photo(way, name)
 
-            shutil.move(name, 'static/img')
-
+            # Проверка того, является ли файл фотографией
             if not imghdr.what(way):
                 err = 'Файл недопустимого формата'
                 os.remove(way)
@@ -230,6 +257,7 @@ def cabinet():
         return render_template('cabinet.html', n=session['username'], i=all[0], d=all[4], l=content, s=all[5], p=all[6], err=err, form=form)
 
 
+# Добавление теории
 @app.route('/add_theory', methods=['GET', 'POST'])
 def add_theory():
     if 'username' not in session:
@@ -244,6 +272,7 @@ def add_theory():
         text = request.form['content']
         f = form.file.data
 
+        # Провека валидности
         if len(title) < 10:
             err = 'Длина заголовка должна быть больше 10 символов'
             return render_template('add_theory.html', form=form, err=err)
@@ -252,11 +281,12 @@ def add_theory():
             err = 'Длина текста должна быть больше 20 символов'
             return render_template('add_theory.html', form=form, err=err)
 
-        if len(text) > 1000:
+        if len(text) > 10000:
             err = 'Длина текста должна быть меньше 1000 символов'
             return render_template('add_theory.html', form=form, err=err)
 
         if f:
+            # То же самое, что и с личным кабинетом, если фотка есть - удаляем
             name = f.filename
             result = open(name, 'wb')
             result.write(f.read())
@@ -264,10 +294,7 @@ def add_theory():
 
             way = 'static/img/' + name
 
-            if os.path.exists(way):
-                os.remove(way)
-
-            shutil.move(name, 'static/img')
+            move_photo(way, name)
 
             if not imghdr.what(way):
                 err = 'Файл недопустимого формата'
@@ -287,14 +314,20 @@ def add_theory():
         return render_template('add_theory.html', form=form, err=err)
 
 
+# Отдельная страница для чтения теории
 @app.route('/read_theory/<int:theory_id>', methods=['GET'])
 def read_theory(theory_id):
     theor = TheoryModel(db.get_connection()).get(theory_id)
     id = theor[6]
-    photo = UserModel(db.get_connection()).get(id)[6]
-    return render_template('read_theory.html', t=theor, p=photo)
+
+    if UserModel(db.get_connection()).exists(theor[3])[0]:
+        photo = UserModel(db.get_connection()).get(id)[6]
+    else:
+        photo = 'delete_user.png'
+    return render_template('read_theory.html', t=theor, p=photo, u=None)
 
 
+# Удаление аккаунта
 @app.route('/delete')
 def delete():
     if 'username' not in session:
@@ -302,14 +335,20 @@ def delete():
 
     um = UserModel(db.get_connection())
     if um.exists(session['username'])[0]:
+        photo = um.get(um.exists(session['username'])[1])[6]
         um.delete(um.exists(session['username'])[1])
+
+    way = 'static/img/' + photo
+    os.remove(way)
 
     session.pop('username', 0)
     session.pop('photo', 0)
+    session.pop('id', 0)
 
     return redirect('/login')
 
 
+# Страница с собственными теориями
 @app.route('/read_my_theories', methods=['GET', 'POST'])
 def read_my_theories():
     if 'username' not in session:
@@ -327,11 +366,17 @@ def read_my_theories():
     all_teories = theor.get_all(user_id=id)
     all_teories = all_teories[::-1]
 
+    for i in range(len(all_teories)):
+        if len(all_teories[i][2]) > 100:
+            all_teories[i] = (all_teories[i][0], all_teories[i][1], all_teories[i][2][:100] + '...',
+                              all_teories[i][3], all_teories[i][4])
+
     if len(all_teories) == 0:
         err = 'Вы еще не добавили ни одной теории!'
         return render_template('read_my_theories.html', tit=tit, form=form, t=result, n=err)
 
     if form.validate_on_submit():
+        # Поиск по автору и по содержанию
         title = request.form['title']
 
         if title:
@@ -349,6 +394,7 @@ def read_my_theories():
         return render_template('read_my_theories.html', n=err, t=all_teories, tit=tit, form=form)
 
 
+# Удаление какой-то теории
 @app.route('/delete_theory/<int:theory_id>', methods=['GET'])
 def delete_theory(theory_id):
     TheoryModel(db.get_connection()).delete(theory_id)
@@ -356,16 +402,21 @@ def delete_theory(theory_id):
     return redirect('/read_my_theories')
 
 
+# Чтение собственной теории
 @app.route('/read_theory_my/<int:theory_id>', methods=['GET'])
 def read_theory_my(theory_id):
     theor = TheoryModel(db.get_connection()).get(theory_id)
-    return render_template('read_theory_my.html', t=theor)
+    return render_template('read_theory.html', t=theor, u='1')
 
 
+# Кабинет другого пользователя, отображается не вся информация
 @app.route('/cabinet_other/<int:user_id>', methods=['GET'])
 def cabinet_other(user_id):
     if 'username' not in session:
         return redirect('/sign_in')
+
+    if user_id == session['id']:
+        return redirect('/cabinet')
 
     um = UserModel(db.get_connection())
     all = um.get(user_id)
@@ -379,6 +430,7 @@ def cabinet_other(user_id):
         return render_template('cabinet_other.html', q='1')
 
 
+# Викторина
 @app.route('/victorine', methods=['GET', 'POST'])
 def victorine():
 
@@ -412,6 +464,12 @@ def victorine():
         return render_template('result_quiz.html', r=status)
     else:
         return render_template('victorine.html', form=form)
+
+
+# Страница с информацией о сайте
+@app.route('/got')
+def got():
+    return render_template('got.html')
 
 
 if __name__ == '__main__':

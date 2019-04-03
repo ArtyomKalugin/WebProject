@@ -2,6 +2,7 @@ from flask import Flask, url_for, request, render_template, make_response, jsoni
 import sqlite3
 
 
+# Класс базы данных
 class DB:
     def __init__(self):
         conn = sqlite3.connect('theory.db', check_same_thread=False)
@@ -14,6 +15,7 @@ class DB:
         self.conn.close()
 
 
+# Класс таблицы пользователей
 class UserModel:
     def __init__(self, connection):
         self.connection = connection
@@ -79,6 +81,7 @@ class UserModel:
         self.connection.commit()
 
 
+# Класс таблицы теории
 class TheoryModel:
     def __init__(self, connection):
         self.connection = connection
@@ -88,7 +91,7 @@ class TheoryModel:
         cursor.execute('''CREATE TABLE IF NOT EXISTS theory
                             (id INTEGER PRIMARY KEY AUTOINCREMENT, 
                              title VARCHAR(100),
-                             content VARCHAR(1000),
+                             content VARCHAR(10000),
                              user VARCHAR(50),
                              data VARCHAR(20),
                              filename VARCHAR(50),

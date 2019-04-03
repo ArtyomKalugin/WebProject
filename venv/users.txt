@@ -1,0 +1,11 @@
+1)	login: IvanIvanov1
+	password: ivanivan
+
+2)	login: PetrPetrov2
+	password: petrpetr
+
+3)	login: IgorIgorev3
+	password: igorigor
+
+
+

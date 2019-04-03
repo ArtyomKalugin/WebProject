@@ -1,0 +1,51 @@
+<!-- Информация о самом сайте -->
+
+{% extends "base.html" %}
+
+{% block head %}
+  <title>О сайте</title>
+  <link rel="shortcut icon" href="static/img/icon.png" type="image/png">
+{% endblock %}
+
+{% block content %}
+  <br>
+  <h1 id="about">
+    Для чего создан этот сайт?
+    <small class="text-muted">Немного информации</small>
+  </h1>
+
+  <br>
+
+  <p class="lead">
+    <strong>Сайт GoT</strong> создан для фанатов сериала <em>"Игра Престолов"</em>.
+    В ожидании нового сезона, фанаты могут почитать различные теории по сериалу или
+    же добавить свою теорию.
+  </p>
+
+  <br>
+
+  <h2>Функционал сайта</h2>
+
+  <br>
+
+  <p class="lead">
+    Вы можете добавлять, удалять или же просто читать теории. Все управление можно
+    осуществлять через личный кабинет. Для этого необходимо зарегистрироваться.
+  </p>
+
+  <br>
+  <h3 class="treiler">Личный кабинет</h3>
+  <img alt="cabinet_img" src="/static/img/cabinet_note.png" width="1100px">
+  <br>
+  <br>
+  <h3 class="treiler">Во вкладке "Теории"</h3>
+  <img alt="theories_img" src="/static/img/theories_note.png" width="1100px">
+  <br>
+  <br>
+  <p class="lead"><strong>
+    Надеемся, остальное ознакомление с сайтом у вас не вызовет затруднений.
+    Наслаждайтесь!
+  </strong></p>
+  <br>
+
+{% endblock %}
